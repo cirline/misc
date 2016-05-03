@@ -13,5 +13,6 @@ enum utf8_char {
 extern char *utf8to16(const char *utf8);
 extern int utf8rchr(const char * utf8, char c);
 extern char * utf8_get_file_extension(char *ext, const char *filename);
+extern int strhash(const char *s, int len);
 
 #endif

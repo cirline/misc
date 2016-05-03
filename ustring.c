@@ -2,7 +2,7 @@
 
 #include <string.h>
 #include "log.h"
-#include "string_utf8.h"
+#include "ustring.h"
 
 enum utf8_char utf8_char_check(char c)
 {
@@ -92,5 +92,16 @@ char * utf8_get_file_extension(char *ext, const char *filename)
 		*ext = 0;
 
 	return ext;
+}
+
+int strhash(const char *s, int len)
+{
+	int hash;
+
+	for(hash = 0; *s; s++) {
+		hash = (hash * 9) ^ *s;
+	}
+
+	return hash % len;
 }
 

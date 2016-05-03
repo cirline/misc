@@ -3,14 +3,17 @@ CFLAGS	+= -shared -fPIC
 
 objs	:=
 objs	+= log.o
-objs	+= string_utf8.o
+objs	+= ustring.o
 
 target	:= ctutils
 
 target_lib	:= lib$(target).so
 
 .PHONY:all
-all: $(target_lib) test.out
+all:
+	make $(target_lib)
+	make install
+	make test.out
 
 $(target_lib):$(objs)
 	$(CC) -o $@ $^ $(CFLAGS)
