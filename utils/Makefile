@@ -3,6 +3,7 @@ CFLAGS	+= -shared -fPIC
 
 objs	:=
 objs	+= log.o
+objs	+= string_utf8.o
 
 target	:= ctutils
 

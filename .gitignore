@@ -1,0 +1,42 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+
+# i define
+tags
+*.dis
+
+# kernel
+*.mod.c
+*.cmd
+Module.symvers
+modules.order
+.tmp_versions
+*.tmp
+
+
+# ignore folder
+code_trash
+linux-2.6.32.67
+simple-codec/
