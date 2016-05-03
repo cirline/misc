@@ -12,11 +12,12 @@ enum __e_debug_level {
 #define pr_fmt(fmt)	fmt
 #endif
 
-#define pr_debug(s, ...)	pr_log("[d]"pr_fmt(s), ##__VA_ARGS__)
-#define pr_info(s, ...)		pr_log("[i]"pr_fmt(s), ##__VA_ARGS__)
-#define pr_err(s, ...)		pr_log("[e]"pr_fmt(s), ##__VA_ARGS__)
+#define pr_debug(s, ...)	pr_log(" d "pr_fmt(s), ##__VA_ARGS__)
+#define pr_info(s, ...)		pr_log(" i "pr_fmt(s), ##__VA_ARGS__)
+#define pr_err(s, ...)		pr_log(" e "pr_fmt(s), ##__VA_ARGS__)
 
 extern int pr_init(const char *path);
 extern int pr_log(const char *s, ...);
+int pr_s2hex(const char *s, ...);
 
 #endif
