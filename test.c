@@ -17,7 +17,7 @@ int main(void)
 	pr_debug("debug message.\n");
 
 	utf8to16("我的朋友.mp3");
-	i = utf8chr_revert(filename, '.');
+	i = utf8rchr(filename, '.');
 
 	pr_info(". index = %d\n", i);
 

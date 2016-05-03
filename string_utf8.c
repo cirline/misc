@@ -52,7 +52,17 @@ char *utf16to8(const char *utf16)
 {
 }
 
-int utf8chr_revert(const char * utf8, char c)
+/**
+ * utf8 string search a char
+ */
+int utf8chr()
+{
+}
+
+/**
+ * utf8 string revert search a char
+ */
+int utf8rchr(const char * utf8, char c)
 {
 	int len;
 	int i;
@@ -68,11 +78,14 @@ int utf8chr_revert(const char * utf8, char c)
 	return i;
 }
 
+/**
+ * get a utf8 file name extension
+ */
 char * utf8_get_file_extension(char *ext, const char *filename)
 {
 	int i;
 
-	i = utf8chr_revert(filename, '.');
+	i = utf8rchr(filename, '.');
 	if(i > 0)
 		strcpy(ext, filename + i + 1);
 	else
