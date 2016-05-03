@@ -20,8 +20,13 @@ test.out:test.c
 
 .PHONY:clean
 
+clean_objs	:=
+clean_objs	+= *.o *.so *.out
+clean_objs	+= *.tmp.log
+clean_objs	+= *.orig
+
 clean:
-	rm -rf *.o *.so *.out *.tmp.log
+	rm -rf $(clean_objs)
 
 .PHONY:install
 
