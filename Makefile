@@ -10,8 +10,7 @@ target	:= ctutils
 target_lib	:= lib$(target).so
 
 .PHONY:all
-all:
-	make $(target_lib)
+all: $(target_lib)
 	make install
 	make test.out
 

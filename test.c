@@ -2,7 +2,7 @@
 #define pr_fmt(fmt) "test " fmt
 
 #include "log.h"
-#include "string_utf8.h"
+#include "ustring.h"
 
 int main(void)
 {

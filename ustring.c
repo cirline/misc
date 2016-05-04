@@ -94,9 +94,9 @@ char * utf8_get_file_extension(char *ext, const char *filename)
 	return ext;
 }
 
-int strhash(const char *s, int len)
+unsigned int strhash(const char *s, unsigned int len)
 {
-	int hash;
+	unsigned int hash;
 
 	for(hash = 0; *s; s++) {
 		hash = (hash * 9) ^ *s;
