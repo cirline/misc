@@ -12,7 +12,12 @@ enum __e_debug_level {
 #define pr_fmt(fmt)	fmt
 #endif
 
+#ifdef DEBUG
 #define pr_debug(s, ...)	pr_log(" d "pr_fmt(s), ##__VA_ARGS__)
+#else
+#define pr_debug(s, ...)
+#endif
+
 #define pr_info(s, ...)		pr_log(" i "pr_fmt(s), ##__VA_ARGS__)
 #define pr_err(s, ...)		pr_log(" e "pr_fmt(s), ##__VA_ARGS__)
 
