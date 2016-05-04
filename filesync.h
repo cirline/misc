@@ -3,10 +3,10 @@
 
 #include <dirent.h>
 
-#if 1
+#if 0
 #define FILESYNC_PATH	"/home/chenqiwei/ddat/e3_share/media/music"
 #else
-#define FILESYNC_PATH	"../ldd"
+#define FILESYNC_PATH	"/home/chqw/chwork/testfiles/test-music"
 #endif
 
 struct dir_node {

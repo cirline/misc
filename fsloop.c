@@ -1,3 +1,5 @@
+//#define DEBUG
+
 #define pr_fmt(fmt)	"fsloop: " fmt
 
 #include <stdio.h>
@@ -11,6 +13,7 @@
 #include "../utils/log.h"
 #include "../utils/ustring.h"
 #include "filesync.h"
+
 
 #define FILE_TABLE_SIZE		1024
 
@@ -93,6 +96,8 @@ int dir_scan()
 	struct dir_node *node;
 	char cur[1024];
 	int type;
+	struct file_desc desc;
+	int rc;
 
 	node = new_dir_node(NULL, FILESYNC_PATH);
 
@@ -108,9 +113,8 @@ int dir_scan()
 				pr_debug("dir: %s\n", cur);
 				break;
 			}
-
-			pr_debug("%s\n", dir->d_name);
-			pr_s2hex("%s", dir->d_name);
+			desc.filename = dir->d_name;
+			rc = file_insert(&desc);
 		}
 
 		if(!dir)
@@ -123,16 +127,50 @@ int dir_scan()
 	return count;
 }
 
+int file_lookup(char *filename)
+{
+	unsigned int hash;
+	int i;
+	struct file_desc *desc;
+
+	hash = strhash(filename, FILE_TABLE_SIZE);
+
+	i = hash;
+
+	do {
+		desc = fdesc_table[i];
+		if(desc) {
+			if(strcmp(filename, desc->filename) == 0)
+				return i;
+		}
+		(i >= FILE_TABLE_SIZE - 1) ? i = 0: i++;
+	} while (i != hash);
+
+	return -1;
+}
+
 int file_insert(struct file_desc *desc)
 {
+	int i;
+	unsigned int hash;
+	struct file_desc *new;
+
 	if(!desc)
 		return -1;
-	desc->hash = strhash(desc->filename, FILE_TABLE_SIZE);
+	hash = strhash(desc->filename, FILE_TABLE_SIZE);
 
-	i = desc->hash;
+	i = hash;
+	pr_debug("insert file, %s (hash: %d)\n", desc->filename, hash);
 	do {
 		if(!fdesc_table[i]) {
-			fdesc_table[i] = desc;
+			new = malloc(sizeof(struct file_desc));
+			if(!new) {
+				pr_err("malloc new file_desc failed: %s\n", strerror(errno));
+				return -1;
+			}
+			new->filename = strdup(desc->filename);
+			new->hash = hash;
+			fdesc_table[i] = new;
 			return i;
 		}
 		(i >= FILE_TABLE_SIZE - 1) ? i = 0: i++;
@@ -142,11 +180,64 @@ int file_insert(struct file_desc *desc)
 	return -1;
 }
 
+int file_remove(struct file_desc *desc)
+{
+	int i;
+	int hash;
+	struct file_desc *rm;
+
+	i = file_lookup(desc->filename);
+	if(i < 0) {
+		pr_err("%s not found.\n");
+		return -1;
+	}
+
+	rm = fdesc_table[i];
+	free(rm->filename);
+	free(rm);
+	fdesc_table[i] = NULL;
+
+	return 0;
+}
+
+int pr_table(void)
+{
+	int i;
+	int count;
+	struct file_desc *desc;
+
+	pr_info("***** print table *****\n");
+	for(i = 0, count = 0; i < FILE_TABLE_SIZE; i++) {
+		desc = fdesc_table[i];
+		if(desc) {
+			count++;
+			pr_info("%4d, %s\n", i, desc->filename);
+		}
+	}
+	pr_info("-- --\n");
+	pr_info("total %d\n", count);
+	pr_info("***** table end *****\n");
+
+	return count;
+}
+
 int fsloop(void)
 {
-	pr_info("fdesc table size = %d\n", sizeof(fdesc_table));
-	memset(fdesc_table, 0, sizeof(fdesc_table));
-//	dir_scan(FILESYNC_PATH);
+	int rc;
+	struct file_desc *desc;
+	char mfile[] = "xiaopinguo.mp3";
 
+	pr_debug("fdesc table size = %d\n", sizeof(fdesc_table));
+	memset(fdesc_table, 0, sizeof(fdesc_table));
+	dir_scan(FILESYNC_PATH);
+
+	pr_table();
+	rc = file_lookup("xiaopinguo.mp3");
+	pr_info("xiaopinguo.mp3, index %d\n", rc);
+
+	desc->filename = mfile;
+	file_remove(desc);
+
+	pr_table();
 	return 0;
 }
