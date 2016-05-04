@@ -225,19 +225,13 @@ int fsloop(void)
 {
 	int rc;
 	struct file_desc *desc;
-	char mfile[] = "xiaopinguo.mp3";
 
+	/* scan the dir to build table */
 	pr_debug("fdesc table size = %d\n", sizeof(fdesc_table));
 	memset(fdesc_table, 0, sizeof(fdesc_table));
 	dir_scan(FILESYNC_PATH);
-
 	pr_table();
-	rc = file_lookup("xiaopinguo.mp3");
-	pr_info("xiaopinguo.mp3, index %d\n", rc);
 
-	desc->filename = mfile;
-	file_remove(desc);
-
-	pr_table();
+	new_socket();
 	return 0;
 }
