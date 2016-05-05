@@ -9,9 +9,13 @@
 #include <errno.h>
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-#include "../utils/log.h"
-#include "../utils/ustring.h"
+//#include "../utils/log.h"
+//#include "../utils/ustring.h"
+#include "../utils/header.h"
 #include "filesync.h"
 
 
@@ -225,6 +229,11 @@ int fsloop(void)
 {
 	int rc;
 	struct file_desc *desc;
+	int fd_sock;
+	int fd_cli;
+	struct sockaddr_in cli_addr;
+	int len;
+	char buffer[1024] = "hello world.";
 
 	/* scan the dir to build table */
 	pr_debug("fdesc table size = %d\n", sizeof(fdesc_table));
@@ -232,6 +241,18 @@ int fsloop(void)
 	dir_scan(FILESYNC_PATH);
 	pr_table();
 
-	new_socket();
+	fd_sock = new_server_socket(NET_PORT, NET_QUEUE);
+	if(fd_sock < 0) {
+		pr_err("new socket failed.\n");
+		return -1;
+	}
+
+	fd_cli = accept(fd_sock, (struct sockaddr *)&cli_addr, &len);
+	if(fd_cli < 0) {
+		pr_err("accept failed: %s\n", strerror(errno));
+		return -1;
+	}
+	write(fd_cli, buffer, 1024);
+
 	return 0;
 }

@@ -11,8 +11,10 @@ target	:= fsdeamon.out
 $(target):$(objs)
 	$(CC) -o $@ $^ $(CFLAGS)
 
-.PHONY:clean
+client.out:client_test.c
+	$(CC) -o $@ $^ $(CFLAGS)
 
+.PHONY:clean
 clean:
 	rm -rf *.o $(target)
 

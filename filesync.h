@@ -9,6 +9,9 @@
 #define FILESYNC_PATH	"/home/chqw/chwork/testfiles/test-music"
 #endif
 
+#define NET_PORT	9877
+#define NET_QUEUE	2
+
 struct dir_node {
 	struct dir_node *prev;
 
