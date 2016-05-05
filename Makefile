@@ -4,6 +4,7 @@ CFLAGS	+= -shared -fPIC
 objs	:=
 objs	+= log.o
 objs	+= ustring.o
+objs	+= unet.o
 
 target	:= ctutils
 
