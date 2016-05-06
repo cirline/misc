@@ -21,61 +21,32 @@
 
 #define FILE_TABLE_SIZE		1024
 
-static struct file_node * fdesc_table[FILE_TABLE_SIZE];
+static struct table_node * tn_table[FILE_TABLE_SIZE];
 
-int file_lookup(char *filename)
-{
-	unsigned int hash;
-	int i;
-	struct file_node *desc;
-
-	hash = strhash(filename, FILE_TABLE_SIZE);
-
-	i = hash;
-
-	do {
-		desc = fdesc_table[i];
-		if(desc) {
-			if(strcmp(filename, desc->filename) == 0)
-				return i;
-		}
-		(i >= FILE_TABLE_SIZE - 1) ? i = 0: i++;
-	} while (i != hash);
-
-	return -1;
-}
-
-int file_insert(struct file_node *desc)
+int file_insert(struct file_node *fnode)
 {
 	int i;
-	unsigned int hash;
 	struct file_node *new;
+	struct table_node tbln;
 
-	if(!desc)
+	if(!fnode)
 		return -1;
-	hash = strhash(desc->filename, FILE_TABLE_SIZE);
+	memset(&tbln, 0, sizeof(tbln));
+	tbln.hash = strhash(fnode->filename, FILE_TABLE_SIZE);
 
-	i = hash;
-	pr_debug("insert file, %s (hash: %d)\n", desc->filename, hash);
-	do {
-		if(!fdesc_table[i]) {
-			new = malloc(sizeof(struct file_node));
-			if(!new) {
-				pr_err("malloc new file_node failed: %s\n", strerror(errno));
-				return -1;
-			}
-			new->filename = strdup(desc->filename);
-			new->hash = hash;
-			fdesc_table[i] = new;
-			return i;
-		}
-		(i >= FILE_TABLE_SIZE - 1) ? i = 0: i++;
-	} while(i != desc->hash);
-	pr_err("table overflow!\n");
+	new = malloc(sizeof(*new));
+	if(!new) {
+		pr_err("malloc new file node failed: %s\n", strerror(errno));
+		return -1;
+	}
+	new->filename = strdup(fnode->filename);
 
-	return -1;
+	tbln.cmp_str = new->filename;
+	tbln.p = new;
+
+	return hash_table_insert(tn_table, &tbln, FILE_TABLE_SIZE);
 }
-
+#if 0
 int file_remove(struct file_node *desc)
 {
 	int i;
@@ -95,26 +66,12 @@ int file_remove(struct file_node *desc)
 
 	return 0;
 }
+#endif
 
-int pr_table(void)
+void pr_table_fn(int i, void *p)
 {
-	int i;
-	int count;
-	struct file_node *desc;
-
-	pr_info("***** print table *****\n");
-	for(i = 0, count = 0; i < FILE_TABLE_SIZE; i++) {
-		desc = fdesc_table[i];
-		if(desc) {
-			count++;
-			pr_info("%4d, %s\n", i, desc->filename);
-		}
-	}
-	pr_info("-- --\n");
-	pr_info("total %d\n", count);
-	pr_info("***** table end *****\n");
-
-	return count;
+	struct file_node *node = p;
+	pr_info("%4d, %s\n", i, node->filename);
 }
 
 int fsloop(void)
@@ -129,9 +86,9 @@ int fsloop(void)
 
 	/* scan the dir to build table */
 	pr_debug("fdesc table size = %d\n", sizeof(fdesc_table));
-	memset(fdesc_table, 0, sizeof(fdesc_table));
 	dir_scan(FILESYNC_PATH, file_insert);
-	pr_table();
+
+	hash_table_print(tn_table, FILE_TABLE_SIZE, pr_table_fn);
 #if 0
 	fd_sock = new_server_socket(NET_PORT, NET_QUEUE);
 	if(fd_sock < 0) {
