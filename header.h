@@ -4,5 +4,6 @@
 #include "log.h"
 #include "ustring.h"
 #include "unet.h"
+#include "ufile.h"
 
 #endif

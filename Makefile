@@ -5,6 +5,7 @@ objs	:=
 objs	+= log.o
 objs	+= ustring.o
 objs	+= unet.o
+objs	+= ufile.o
 
 target	:= ctutils
 
