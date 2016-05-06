@@ -13,7 +13,6 @@ struct dir_node {
 struct file_node {
 	char * filename;
 	char * rel_dir;
-	int hash;
 };
 
 typedef int (*fn_do_each_t)(struct file_node *f);
