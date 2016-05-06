@@ -12,19 +12,6 @@
 #define NET_PORT	9877
 #define NET_QUEUE	2
 
-struct dir_node {
-	struct dir_node *prev;
-
-	DIR *d;
-	char *path;
-};
-
-struct file_desc {
-	char * filename;
-	char * rel_dir;
-	int hash;
-};
-
 extern int fsloop(void);
 
 #endif

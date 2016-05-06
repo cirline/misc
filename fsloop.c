@@ -21,121 +21,13 @@
 
 #define FILE_TABLE_SIZE		1024
 
-static struct file_desc * fdesc_table[FILE_TABLE_SIZE];
-
-/**
- * test file type
- * <1: error
- * =0: dir
- * >0: file
- */
-int file_type(const char *path)
-{
-	struct stat sbuf;
-
-	if(stat(path, &sbuf)) {
-		pr_err("stat %s failed: %s\n", strerror(errno));
-		return -1;
-	}
-
-	if(S_ISDIR(sbuf.st_mode)) {
-		return 0;
-	} else {
-		return 1;
-	}
-
-
-}
-
-struct dir_node * new_dir_node(struct dir_node *parent, const char * path)
-{
-	struct dir_node *node;
-
-	node = malloc(sizeof(struct dir_node));
-	if(!node) {
-		pr_err("malloc node failed: %s\n", strerror(errno));
-		goto err;
-	}
-	node->path = strdup(path);
-	if(!node->path) {
-		pr_err("dup path failed: %s\n", strerror(errno));
-		goto err_dup_path;
-	}
-
-	node->prev = parent;
-	node->d = opendir(path);
-	if(!node->d) {
-		pr_err("open dir %s failed: %s\n", path, strerror(errno));
-		free(node);
-		return NULL;
-	}
-
-	return node;
-
-err_dup_path:
-	free(node);
-err:
-	return NULL;
-}
-
-struct dir_node * put_dir_node(struct dir_node *node)
-{
-	struct dir_node *p;
-
-	if(!node)
-		return NULL;
-
-	closedir(node->d);
-	p = node->prev;
-	free(node);
-
-	return p;
-}
-
-int dir_scan()
-{
-	DIR *d;
-	struct dirent *dir;
-	int count = 0;
-	struct dir_node *node;
-	char cur[1024];
-	int type;
-	struct file_desc desc;
-	int rc;
-
-	node = new_dir_node(NULL, FILESYNC_PATH);
-
-	while(node) {
-		while(dir = readdir(node->d)) {
-			if(*dir->d_name  == '.')
-				continue;
-
-			sprintf(cur, "%s/%s", node->path, dir->d_name);
-			type = file_type(cur);
-
-			if(type == 0) {
-				pr_debug("dir: %s\n", cur);
-				break;
-			}
-			desc.filename = dir->d_name;
-			rc = file_insert(&desc);
-		}
-
-		if(!dir)
-			node = put_dir_node(node);
-		else
-			node = new_dir_node(node, cur);
-	}
-
-
-	return count;
-}
+static struct file_node * fdesc_table[FILE_TABLE_SIZE];
 
 int file_lookup(char *filename)
 {
 	unsigned int hash;
 	int i;
-	struct file_desc *desc;
+	struct file_node *desc;
 
 	hash = strhash(filename, FILE_TABLE_SIZE);
 
@@ -153,11 +45,11 @@ int file_lookup(char *filename)
 	return -1;
 }
 
-int file_insert(struct file_desc *desc)
+int file_insert(struct file_node *desc)
 {
 	int i;
 	unsigned int hash;
-	struct file_desc *new;
+	struct file_node *new;
 
 	if(!desc)
 		return -1;
@@ -167,9 +59,9 @@ int file_insert(struct file_desc *desc)
 	pr_debug("insert file, %s (hash: %d)\n", desc->filename, hash);
 	do {
 		if(!fdesc_table[i]) {
-			new = malloc(sizeof(struct file_desc));
+			new = malloc(sizeof(struct file_node));
 			if(!new) {
-				pr_err("malloc new file_desc failed: %s\n", strerror(errno));
+				pr_err("malloc new file_node failed: %s\n", strerror(errno));
 				return -1;
 			}
 			new->filename = strdup(desc->filename);
@@ -184,11 +76,11 @@ int file_insert(struct file_desc *desc)
 	return -1;
 }
 
-int file_remove(struct file_desc *desc)
+int file_remove(struct file_node *desc)
 {
 	int i;
 	int hash;
-	struct file_desc *rm;
+	struct file_node *rm;
 
 	i = file_lookup(desc->filename);
 	if(i < 0) {
@@ -208,7 +100,7 @@ int pr_table(void)
 {
 	int i;
 	int count;
-	struct file_desc *desc;
+	struct file_node *desc;
 
 	pr_info("***** print table *****\n");
 	for(i = 0, count = 0; i < FILE_TABLE_SIZE; i++) {
@@ -228,7 +120,7 @@ int pr_table(void)
 int fsloop(void)
 {
 	int rc;
-	struct file_desc *desc;
+	struct file_node *desc;
 	int fd_sock;
 	int fd_cli;
 	struct sockaddr_in cli_addr;
@@ -238,9 +130,9 @@ int fsloop(void)
 	/* scan the dir to build table */
 	pr_debug("fdesc table size = %d\n", sizeof(fdesc_table));
 	memset(fdesc_table, 0, sizeof(fdesc_table));
-	dir_scan(FILESYNC_PATH);
+	dir_scan(FILESYNC_PATH, file_insert);
 	pr_table();
-
+#if 0
 	fd_sock = new_server_socket(NET_PORT, NET_QUEUE);
 	if(fd_sock < 0) {
 		pr_err("new socket failed.\n");
@@ -253,6 +145,6 @@ int fsloop(void)
 		return -1;
 	}
 	write(fd_cli, buffer, 1024);
-
+#endif
 	return 0;
 }
