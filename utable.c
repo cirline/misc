@@ -6,25 +6,24 @@
 
 #include "header.h"
 
-int hash_table_lookup(struct table_node *head[], struct table_node *node, int table_size)
+int hash_table_lookup(struct hash_table_desc *ht, struct table_node *node)
 {
 	int i;
 	struct table_node *p;
 
-	if(!head || !node || table_size <= 0)
+	if(!ht || !ht->tbl || ht->size <= 0 || !node)
 		return -1;
 
 	i = node->hash;
-
 	do {
-		p = head[i];
+		p = ht->tbl[i];
 		if(p) {
 			if(node->cmp_str && !strcmp(p->cmp_str, node->cmp_str))
 				return i;
 			else if(node->cmp_int == p->cmp_int)
 				return i;
 		}
-		(i >= table_size - 1) ? i = 0: i++;
+		(i >= ht->size - 1) ? i = 0: i++;
 	} while (i != node->hash);
 
 	return -1;
@@ -63,49 +62,52 @@ int hash_table_insert(struct table_node *head[], struct table_node *node, int ta
 	return -1;
 }
 
-void * hash_table_remove(struct table_node *head[], struct table_node *node, int table_size)
+int hash_table_remove(struct hash_table_desc *ht, struct table_node *node)
 {
 	int i;
 	int hash;
 	struct table_node *rm;
-	void *p;
 
-	if(!head || !node || table_size <= 0)
-		return NULL;
+	if(!ht || !ht->tbl || ht->size <= 0 || !node)
+		return -1;
 
-	i = hash_table_lookup(head, node, table_size);
+	i = hash_table_lookup(ht, node);
 	if(i < 0) {
 		pr_err("remove node not found.\n");
-		return NULL;
+		return -1;
 	}
 
-	rm = head[i];
-	p = rm->p;
+	rm = ht->tbl[i];
+
+	/* free p */
+	if(ht->remove)
+		ht->remove(rm->p);
+	/* free table node */
 	if(rm->cmp_str)
 		free(rm->cmp_str);
 	free(rm);
-	head[i] = NULL;
+	ht->tbl[i] = NULL;
 
-	return p;
+	return 0;
 }
 
 
-int hash_table_print(struct table_node *head[], int table_size, tbl_custom_pr_t pr_fn)
+int hash_table_print(struct hash_table_desc *ht)
 {
 	int i;
 	int count;
 	struct table_node *node;
 
-	if(!head || table_size <= 0)
+	if(!ht || !ht->tbl || ht->size <= 0)
 		return -1;
 
 	pr_info("***** print table *****\n");
-	for(i = 0, count = 0; i < table_size; i++) {
-		node = head[i];
+	for(i = 0, count = 0; i < ht->size; i++) {
+		node = ht->tbl[i];
 		if(node) {
 			count++;
-			if(pr_fn)
-				pr_fn(i, node->p);
+			if(ht->print)
+				ht->print(i, node->p);
 		}
 	}
 	pr_info("-- --\n");
