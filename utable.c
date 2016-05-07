@@ -63,28 +63,30 @@ int hash_table_insert(struct table_node *head[], struct table_node *node, int ta
 	return -1;
 }
 
-int hash_table_remove(struct table_node *head[], struct table_node *node, int table_size)
+void * hash_table_remove(struct table_node *head[], struct table_node *node, int table_size)
 {
 	int i;
 	int hash;
 	struct table_node *rm;
+	void *p;
 
 	if(!head || !node || table_size <= 0)
-		return -1;
+		return NULL;
 
 	i = hash_table_lookup(head, node, table_size);
 	if(i < 0) {
 		pr_err("remove node not found.\n");
-		return -1;
+		return NULL;
 	}
 
 	rm = head[i];
+	p = rm->p;
 	if(rm->cmp_str)
 		free(rm->cmp_str);
 	free(rm);
 	head[i] = NULL;
 
-	return 0;
+	return p;
 }
 
 
