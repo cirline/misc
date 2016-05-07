@@ -18,10 +18,11 @@
 #include "../utils/header.h"
 #include "filesync.h"
 
-
 #define FILE_TABLE_SIZE		1024
 
 static struct table_node * tn_table[FILE_TABLE_SIZE];
+
+static struct hash_table_desc htdesc;
 
 int file_insert(struct file_node *fnode)
 {
@@ -47,22 +48,13 @@ int file_insert(struct file_node *fnode)
 	return hash_table_insert(tn_table, &tbln, FILE_TABLE_SIZE);
 }
 
-int file_remove(struct file_node *fnode)
+int file_remove(void *p)
 {
-	int i;
-	int hash;
-	struct file_node *rm;
-	struct table_node tnode;
+	struct file_node *fnode = p;
 
-	memset(&tnode, 0, sizeof(tnode));
-
-	tnode.cmp_str = fnode->filename;
-	tnode.hash = strhash(fnode->filename, FILE_TABLE_SIZE);
-
-	rm = hash_table_remove(tn_table, &tnode, FILE_TABLE_SIZE);
-	if(rm) {
-		free(rm->filename);
-		free(rm);
+	if(fnode) {
+		free(fnode->filename);
+		free(fnode);
 	}
 
 	return 0;
@@ -74,6 +66,21 @@ void pr_table_fn(int i, void *p)
 	pr_info("%4d, %s\n", i, node->filename);
 }
 
+int build_node(struct table_node *tnode, struct file_node *fnode, char *name)
+{
+	int hash;
+
+	fnode->filename = name;
+
+	memset(tnode, 0, sizeof(*tnode));
+	tnode->p = fnode;
+	tnode->cmp_str = name;
+	tnode->hash = strhash(name, FILE_TABLE_SIZE);
+
+	return 0;
+}
+
+
 int fsloop(void)
 {
 	int rc;
@@ -83,19 +90,26 @@ int fsloop(void)
 	struct sockaddr_in cli_addr;
 	int len;
 	char buffer[1024] = "xiaopinguo.mp3";
+	struct table_node tnode;
 	struct file_node fnode;
+
+	htdesc.tbl = tn_table;
+	htdesc.size = FILE_TABLE_SIZE;
+
+	//htdesc.insert = file_insert;
+	htdesc.remove = file_remove;
+	htdesc.print = pr_table_fn;
 
 	/* scan the dir to build table */
 	pr_debug("fdesc table size = %d\n", sizeof(fdesc_table));
 	dir_scan(FILESYNC_PATH, file_insert);
 
-	hash_table_print(tn_table, FILE_TABLE_SIZE, pr_table_fn);
+	hash_table_print(&htdesc);
 
-	fnode.filename = buffer;
-	file_remove(&fnode);
+	build_node(&tnode, &fnode, buffer);
+	hash_table_remove(&htdesc, &tnode);
 
-	hash_table_print(tn_table, FILE_TABLE_SIZE, pr_table_fn);
-
+	hash_table_print(&htdesc);
 #if 0
 	fd_sock = new_server_socket(NET_PORT, NET_QUEUE);
 	if(fd_sock < 0) {
