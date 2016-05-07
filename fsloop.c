@@ -24,42 +24,6 @@ static struct table_node * tn_table[FILE_TABLE_SIZE];
 
 static struct hash_table_desc htdesc;
 
-int file_insert(struct file_node *fnode)
-{
-	int i;
-	struct file_node *new;
-	struct table_node tbln;
-
-	if(!fnode)
-		return -1;
-	memset(&tbln, 0, sizeof(tbln));
-	tbln.hash = strhash(fnode->filename, FILE_TABLE_SIZE);
-
-	new = malloc(sizeof(*new));
-	if(!new) {
-		pr_err("malloc new file node failed: %s\n", strerror(errno));
-		return -1;
-	}
-	new->filename = strdup(fnode->filename);
-
-	tbln.cmp_str = new->filename;
-	tbln.p = new;
-
-	return hash_table_insert(tn_table, &tbln, FILE_TABLE_SIZE);
-}
-
-int file_remove(void *p)
-{
-	struct file_node *fnode = p;
-
-	if(fnode) {
-		free(fnode->filename);
-		free(fnode);
-	}
-
-	return 0;
-}
-
 void pr_table_fn(int i, void *p)
 {
 	struct file_node *node = p;
@@ -80,6 +44,16 @@ int build_node(struct table_node *tnode, struct file_node *fnode, char *name)
 	return 0;
 }
 
+int do_each_file(struct file_node *node)
+{
+	struct table_node tnode;
+	struct file_node fnode;
+
+	build_node(&tnode, &fnode, node->filename);
+	hash_table_insert(&htdesc, &tnode);
+
+	return 0;
+}
 
 int fsloop(void)
 {
@@ -96,13 +70,12 @@ int fsloop(void)
 	htdesc.tbl = tn_table;
 	htdesc.size = FILE_TABLE_SIZE;
 
-	//htdesc.insert = file_insert;
-	htdesc.remove = file_remove;
+	htdesc.insert = (void *(*)(void *))new_file_node;
+	htdesc.remove = (void (*)(void *))free_file_node;
 	htdesc.print = pr_table_fn;
 
 	/* scan the dir to build table */
-	pr_debug("fdesc table size = %d\n", sizeof(fdesc_table));
-	dir_scan(FILESYNC_PATH, file_insert);
+	dir_scan(FILESYNC_PATH, do_each_file);
 
 	hash_table_print(&htdesc);
 
