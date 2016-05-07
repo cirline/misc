@@ -46,27 +46,27 @@ int file_insert(struct file_node *fnode)
 
 	return hash_table_insert(tn_table, &tbln, FILE_TABLE_SIZE);
 }
-#if 0
-int file_remove(struct file_node *desc)
+
+int file_remove(struct file_node *fnode)
 {
 	int i;
 	int hash;
 	struct file_node *rm;
+	struct table_node tnode;
 
-	i = file_lookup(desc->filename);
-	if(i < 0) {
-		pr_err("%s not found.\n");
-		return -1;
+	memset(&tnode, 0, sizeof(tnode));
+
+	tnode.cmp_str = fnode->filename;
+	tnode.hash = strhash(fnode->filename, FILE_TABLE_SIZE);
+
+	rm = hash_table_remove(tn_table, &tnode, FILE_TABLE_SIZE);
+	if(rm) {
+		free(rm->filename);
+		free(rm);
 	}
-
-	rm = fdesc_table[i];
-	free(rm->filename);
-	free(rm);
-	fdesc_table[i] = NULL;
 
 	return 0;
 }
-#endif
 
 void pr_table_fn(int i, void *p)
 {
@@ -82,13 +82,20 @@ int fsloop(void)
 	int fd_cli;
 	struct sockaddr_in cli_addr;
 	int len;
-	char buffer[1024] = "hello world.";
+	char buffer[1024] = "xiaopinguo.mp3";
+	struct file_node fnode;
 
 	/* scan the dir to build table */
 	pr_debug("fdesc table size = %d\n", sizeof(fdesc_table));
 	dir_scan(FILESYNC_PATH, file_insert);
 
 	hash_table_print(tn_table, FILE_TABLE_SIZE, pr_table_fn);
+
+	fnode.filename = buffer;
+	file_remove(&fnode);
+
+	hash_table_print(tn_table, FILE_TABLE_SIZE, pr_table_fn);
+
 #if 0
 	fd_sock = new_server_socket(NET_PORT, NET_QUEUE);
 	if(fd_sock < 0) {
