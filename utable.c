@@ -29,19 +29,19 @@ int hash_table_lookup(struct hash_table_desc *ht, struct table_node *node)
 	return -1;
 }
 
-int hash_table_insert(struct table_node *head[], struct table_node *node, int table_size)
+int hash_table_insert(struct hash_table_desc *ht, struct table_node *node)
 {
 	int i;
 	unsigned int hash;
 	struct table_node *new;
 
-	if(!head || !node || table_size <= 0)
+	if(!ht || !ht->tbl || ht->size <= 0 || !node)
 		return -1;
 
 	i = node->hash;
 	pr_debug("insert node (hash: %d)\n", node->hash);
 	do {
-		if(!head[i]) {
+		if(!ht->tbl[i]) {
 			new = malloc(sizeof(*new));
 			if(!new) {
 				pr_err("malloc new node failed: %s\n", strerror(errno));
@@ -51,11 +51,12 @@ int hash_table_insert(struct table_node *head[], struct table_node *node, int ta
 				new->cmp_str = strdup(node->cmp_str);
 			new->cmp_int = node->cmp_int;
 			new->hash = node->hash;
-			new->p = node->p;
-			head[i] = new;
+			if(ht->insert)
+				new->p = ht->insert(node);
+			ht->tbl[i] = new;
 			return i;
 		}
-		(i >= table_size - 1) ? i = 0: i++;
+		(i >= ht->size - 1) ? i = 0: i++;
 	} while(i != node->hash);
 	pr_err("table overflow!\n");
 

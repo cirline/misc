@@ -113,3 +113,29 @@ int dir_scan(const char * root, fn_do_each_t do_each)
 	return count;
 }
 
+struct file_node * new_file_node(struct file_node *node)
+{
+	int i;
+	struct file_node *new;
+
+	if(!node)
+		return NULL;
+
+	new = malloc(sizeof(*new));
+	if(!new) {
+		pr_err("malloc file node failed: %s\n", strerror(errno));
+		return NULL;
+	}
+	new->filename = strdup(node->filename);
+
+	return new;
+}
+
+void free_file_node(struct file_node *node)
+{
+	if(node) {
+		free(node->filename);
+		free(node);
+	}
+}
+

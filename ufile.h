@@ -19,5 +19,7 @@ typedef int (*fn_do_each_t)(struct file_node *f);
 
 extern int file_type(const char *path);
 extern int dir_scan(const char *, fn_do_each_t do_each);
+extern struct file_node * new_file_node(struct file_node *node);
+extern void free_file_node(struct file_node *node);
 
 #endif
