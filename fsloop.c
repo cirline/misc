@@ -1,4 +1,4 @@
-//#define DEBUG
+#define DEBUG
 
 #define pr_fmt(fmt)	"fsloop: " fmt
 
@@ -63,7 +63,7 @@ int fsloop(void)
 	int fd_cli;
 	struct sockaddr_in cli_addr;
 	int len;
-	char buffer[1024] = "xiaopinguo.mp3";
+	char buffer[1024] = "main.c";
 	struct table_node tnode;
 	struct file_node fnode;
 
@@ -83,19 +83,24 @@ int fsloop(void)
 	hash_table_remove(&htdesc, &tnode);
 
 	hash_table_print(&htdesc);
-#if 0
+
 	fd_sock = new_server_socket(NET_PORT, NET_QUEUE);
 	if(fd_sock < 0) {
 		pr_err("new socket failed.\n");
 		return -1;
 	}
 
+	len = sizeof(struct sockaddr_in);
 	fd_cli = accept(fd_sock, (struct sockaddr *)&cli_addr, &len);
 	if(fd_cli < 0) {
 		pr_err("accept failed: %s\n", strerror(errno));
 		return -1;
 	}
-	write(fd_cli, buffer, 1024);
-#endif
+	rc = write(fd_cli, buffer, 1024);
+
+	pr_debug("socket write rc = %d\n", rc);
+
+	close(fd_sock);
+
 	return 0;
 }

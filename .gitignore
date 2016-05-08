@@ -3,3 +3,4 @@
 *.out
 
 tags
+config.h
