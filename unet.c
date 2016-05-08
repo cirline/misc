@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include <string.h>
 #include <errno.h>
 
@@ -10,12 +12,19 @@ int new_server_socket(int port, int backlog)
 {
 	int fd;
 	int rc;
+	int on;
 	struct sockaddr_in addr;
 
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 	if(fd < 0) {
 		pr_err("create socket failed: %s\n", strerror(errno));
 		return fd;
+	}
+
+	on = 1;
+	if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+		pr_err("setsockopt failed: %s\n", strerror(errno));
+		goto err_setsockopt;
 	}
 
 	addr.sin_family = AF_INET;
@@ -36,6 +45,7 @@ int new_server_socket(int port, int backlog)
 
 err_listen:
 err_bind:
+err_setsockopt:
 	close(fd);
 
 	return rc;
@@ -63,6 +73,7 @@ int new_client_socket(char *ip, int port)
 		close(fd);
 		return rc;
 	}
+	pr_debug("client connected.\n");
 
 	return fd;
 }
