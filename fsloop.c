@@ -8,13 +8,12 @@
 #include <string.h>
 #include <errno.h>
 
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-//#include "../utils/log.h"
-//#include "../utils/ustring.h"
 #include "../utils/header.h"
 #include "filesync.h"
 
@@ -24,6 +23,9 @@ static struct table_node * tn_table[FILE_TABLE_SIZE];
 
 static struct hash_table_desc htdesc;
 
+static int fd_sock;
+static int fd_cli;
+
 void pr_table_fn(int i, void *p)
 {
 	struct file_node *node = p;
@@ -32,8 +34,6 @@ void pr_table_fn(int i, void *p)
 
 int build_node(struct table_node *tnode, struct file_node *fnode, char *name)
 {
-	int hash;
-
 	fnode->filename = name;
 
 	memset(tnode, 0, sizeof(*tnode));
@@ -55,17 +55,20 @@ int do_each_file(struct file_node *node)
 	return 0;
 }
 
+int send_to_client(int i, struct file_node *node)
+{
+	write(fd_cli, node->filename, 1024);
+	read("");
+}
+
 int fsloop(void)
 {
 	int rc;
-	struct file_node *desc;
-	int fd_sock;
-	int fd_cli;
 	struct sockaddr_in cli_addr;
-	int len;
-	char buffer[1024] = "main.c";
-	struct table_node tnode;
-	struct file_node fnode;
+	socklen_t len;
+	char buffer[1024] = "amain.c";
+	//struct table_node tnode;
+	//struct file_node fnode;
 
 	htdesc.tbl = tn_table;
 	htdesc.size = FILE_TABLE_SIZE;
@@ -78,12 +81,12 @@ int fsloop(void)
 	dir_scan(FILESYNC_PATH, do_each_file);
 
 	hash_table_print(&htdesc);
-
+#if 0
 	build_node(&tnode, &fnode, buffer);
 	hash_table_remove(&htdesc, &tnode);
 
 	hash_table_print(&htdesc);
-
+#endif
 	fd_sock = new_server_socket(NET_PORT, NET_QUEUE);
 	if(fd_sock < 0) {
 		pr_err("new socket failed.\n");

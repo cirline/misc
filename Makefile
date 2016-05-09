@@ -1,5 +1,5 @@
 CC	:= cc
-CFLAGS	+= -lctutils
+CFLAGS	+= -lctutils -Wall
 
 objs	:=
 objs	+= main.o
