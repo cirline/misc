@@ -24,6 +24,7 @@ typedef void (*tbl_custom_pr_t)(int index, void *p);
 extern int hash_table_lookup(struct hash_table_desc *ht, struct table_node *node);
 extern int hash_table_insert(struct hash_table_desc *ht, struct table_node *node);
 extern int hash_table_remove(struct hash_table_desc *ht, struct table_node *node);
+extern int hash_table_foreach(struct hash_table_desc *ht);
 extern int hash_table_print(struct hash_table_desc *ht);
 
 #endif
