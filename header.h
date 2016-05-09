@@ -6,5 +6,6 @@
 #include "unet.h"
 #include "ufile.h"
 #include "utable.h"
+#include "upthread.h"
 
 #endif
