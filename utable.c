@@ -1,4 +1,4 @@
-#define DEBUG
+//#define DEBUG
 #define pr_fmt(fmt)	"utils_table: " fmt
 
 #include <stdlib.h>
@@ -95,31 +95,39 @@ int hash_table_remove(struct hash_table_desc *ht, struct table_node *node)
 	return 0;
 }
 
-
-int hash_table_print(struct hash_table_desc *ht)
+int hash_table_foreach(struct hash_table_desc *ht)
 {
-	int i;
-	int count;
+	int i, count;
 	struct table_node *node;
 
 	if(!ht || !ht->tbl || ht->size <= 0)
 		return -1;
 
-	pr_info("***** print table *****\n");
 	for(i = 0, count = 0; i < ht->size; i++) {
 		node = ht->tbl[i];
-		if(node) {
+		if(node && ht->foreach) {
 			count++;
-			if(ht->print)
-				ht->print(i, node->p);
+			ht->foreach(i, node->p);
 		}
 	}
-	pr_info("-- --\n");
+
+	return count;
+}
+
+int hash_table_print(struct hash_table_desc *ht)
+{
+	int count;
+
+	if(!ht || !ht->tbl || ht->size <= 0)
+		return -1;
+
+	pr_info("***** print table *****\n");
+	ht->foreach = ht->print;
+	count = hash_table_foreach(ht);
+	pr_info("\n");
 	pr_info("total %d\n", count);
 	pr_info("***** table end *****\n");
 
 	return count;
 }
-
-
 

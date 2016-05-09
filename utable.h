@@ -15,6 +15,7 @@ struct hash_table_desc {
 
 	void * (*insert)(void *node);
 	void (*remove)(void *p);
+	void (*foreach)(int index, void *p);
 	void (*print)(int index, void *p);
 };
 
