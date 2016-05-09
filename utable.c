@@ -1,4 +1,5 @@
-#define pr_fmt(fmt)	"table: " fmt
+#define DEBUG
+#define pr_fmt(fmt)	"utils_table: " fmt
 
 #include <stdlib.h>
 #include <string.h>
@@ -18,10 +19,14 @@ int hash_table_lookup(struct hash_table_desc *ht, struct table_node *node)
 	do {
 		p = ht->tbl[i];
 		if(p) {
-			if(node->cmp_str && !strcmp(p->cmp_str, node->cmp_str))
+			if(node->cmp_str) {
+				if(strcmp(p->cmp_str, node->cmp_str) == 0) {
+					return i;
+				}
+			}
+			else if(node->cmp_int == p->cmp_int) {
 				return i;
-			else if(node->cmp_int == p->cmp_int)
-				return i;
+			}
 		}
 		(i >= ht->size - 1) ? i = 0: i++;
 	} while (i != node->hash);

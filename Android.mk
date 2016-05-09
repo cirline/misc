@@ -18,7 +18,12 @@ include $(CLEAR_VARS)
 
 LOCAL_CFLAGS	+= -DANDROID=1 -Wall
 LOCAL_MODULE    := tools_utils
-LOCAL_SRC_FILES := log.c unet.c
+LOCAL_SRC_FILES := \
+	log.c \
+	unet.c \
+	ufile.c \
+	utable.c \
+	ustring.c
 
 include $(BUILD_STATIC_LIBRARY)
 
