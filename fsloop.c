@@ -55,18 +55,23 @@ int do_each_file(struct file_node *node)
 	return 0;
 }
 
-int send_to_client(int i, struct file_node *node)
+void send_to_client(int i, struct file_node *node)
 {
-	write(fd_cli, node->filename, 1024);
-	read("");
+	int rc;
+	char buffer[1024];
+
+	pr_info("%s, %d\n", __func__, i);
+	strcpy(buffer, node->filename);
+	write(fd_cli, buffer, 1024);
+	read(fd_cli, &rc, sizeof(rc));
 }
 
 int fsloop(void)
 {
-	int rc;
+	//int rc;
 	struct sockaddr_in cli_addr;
 	socklen_t len;
-	char buffer[1024] = "amain.c";
+	char buffer[1024] = "command:end";
 	//struct table_node tnode;
 	//struct file_node fnode;
 
@@ -99,9 +104,11 @@ int fsloop(void)
 		pr_err("accept failed: %s\n", strerror(errno));
 		return -1;
 	}
-	rc = write(fd_cli, buffer, 1024);
 
-	pr_debug("socket write rc = %d\n", rc);
+	htdesc.foreach = (void (*)(int , void *))send_to_client;
+	hash_table_foreach(&htdesc);
+
+	write(fd_cli, buffer, 1024);
 
 	close(fd_sock);
 
