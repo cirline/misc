@@ -77,19 +77,17 @@ struct dir_node * put_dir_node(struct dir_node *node)
 
 int dir_scan(const char * root, fn_do_each_t do_each)
 {
-	DIR *d;
 	struct dirent *dir;
 	int count = 0;
 	struct dir_node *dnode;
 	char cur[1024];
 	int type;
 	struct file_node fnode;
-	int rc;
 
 	dnode = new_dir_node(NULL, root);
 
 	while(dnode) {
-		while(dir = readdir(dnode->d)) {
+		while((dir = readdir(dnode->d))) {
 			if(*dir->d_name  == '.')
 				continue;
 
@@ -101,7 +99,7 @@ int dir_scan(const char * root, fn_do_each_t do_each)
 				break;
 			}
 			fnode.filename = dir->d_name;
-			rc = do_each(&fnode);
+			do_each(&fnode);
 		}
 
 		if(!dir)
@@ -115,7 +113,6 @@ int dir_scan(const char * root, fn_do_each_t do_each)
 
 struct file_node * new_file_node(struct file_node *node)
 {
-	int i;
 	struct file_node *new;
 
 	if(!node)

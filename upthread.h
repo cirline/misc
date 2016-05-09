@@ -7,7 +7,9 @@
 #include <jni.h>
 #endif
 
-struct thread_desc {
+#define thread_desc	pthread_desc
+
+struct pthread_desc {
 	int en;
 	pthread_t id;
 	int what;

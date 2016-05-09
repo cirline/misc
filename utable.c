@@ -32,7 +32,6 @@ int hash_table_lookup(struct hash_table_desc *ht, struct table_node *node)
 int hash_table_insert(struct hash_table_desc *ht, struct table_node *node)
 {
 	int i;
-	unsigned int hash;
 	struct table_node *new;
 
 	if(!ht || !ht->tbl || ht->size <= 0 || !node)
@@ -66,7 +65,6 @@ int hash_table_insert(struct hash_table_desc *ht, struct table_node *node)
 int hash_table_remove(struct hash_table_desc *ht, struct table_node *node)
 {
 	int i;
-	int hash;
 	struct table_node *rm;
 
 	if(!ht || !ht->tbl || ht->size <= 0 || !node)

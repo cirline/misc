@@ -48,16 +48,9 @@ char *utf8to16(const char *utf8)
 	return NULL;
 }
 
-char *utf16to8(const char *utf16)
-{
-}
-
 /**
  * utf8 string search a char
  */
-int utf8chr()
-{
-}
 
 /**
  * utf8 string revert search a char

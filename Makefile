@@ -1,5 +1,5 @@
 CC	:= cc
-CFLAGS	+= -shared -fPIC
+CFLAGS	+= -shared -fPIC -Wall
 
 objs	:=
 objs	+= log.o

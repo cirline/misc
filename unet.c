@@ -3,8 +3,10 @@
 #include <string.h>
 #include <errno.h>
 
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "header.h"
 
@@ -22,7 +24,8 @@ int new_server_socket(int port, int backlog)
 	}
 
 	on = 1;
-	if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+	rc = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+	if(rc < 0) {
 		pr_err("setsockopt failed: %s\n", strerror(errno));
 		goto err_setsockopt;
 	}
