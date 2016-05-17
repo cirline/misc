@@ -1,4 +1,4 @@
-#define pr_fmt(fmt)	"string_utf8: " fmt
+#define pr_fmt(fmt)	"string_utf8 " fmt
 
 #include <string.h>
 #include "log.h"

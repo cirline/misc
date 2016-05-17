@@ -1,5 +1,5 @@
-//#define DEBUG
-#define pr_fmt(fmt)	"utils_table: " fmt
+#define DEBUG
+#define pr_fmt(fmt)	"utils_table " fmt
 
 #include <stdlib.h>
 #include <string.h>
@@ -95,6 +95,15 @@ int hash_table_remove(struct hash_table_desc *ht, struct table_node *node)
 	return 0;
 }
 
+void * hash_table_get_nodedata(struct table_node *node)
+{
+	return node->p;
+}
+
+/**
+ * run foreach each not null table_node
+ * index and table_node void *p will transfer to foreach function
+ */
 int hash_table_foreach(struct hash_table_desc *ht)
 {
 	int i, count;
@@ -107,7 +116,7 @@ int hash_table_foreach(struct hash_table_desc *ht)
 		node = ht->tbl[i];
 		if(node && ht->foreach) {
 			count++;
-			ht->foreach(i, node->p);
+			ht->foreach(i, node);
 		}
 	}
 
@@ -125,8 +134,7 @@ int hash_table_print(struct hash_table_desc *ht)
 	ht->foreach = ht->print;
 	count = hash_table_foreach(ht);
 	pr_info("\n");
-	pr_info("total %d\n", count);
-	pr_info("***** table end *****\n");
+	pr_info("***** print end, total %d *****\n", count);
 
 	return count;
 }
