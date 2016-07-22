@@ -1,8 +1,8 @@
 #define pr_fmt(fmt)	"string_utf8: " fmt
 
 #include <string.h>
-#include "log.h"
-#include "ustring.h"
+#include "ccutils/log.h"
+#include "ccutils/ustring.h"
 
 enum utf8_char utf8_char_check(char c)
 {
