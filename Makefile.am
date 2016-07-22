@@ -1,6 +1,10 @@
 
 lib_LTLIBRARIES = libutils.la
-libutils_la_SOURCES = log.c ustring.c unet.c ufile.c utable.c
+libutils_la_SOURCES = src/log.c \
+		      src/ustring.c \
+		      src/unet.c \
+		      src/ufile.c \
+		      src/utable.c
 
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include

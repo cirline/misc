@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([libutils], [0.1], [chqiwei89@163.com])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
