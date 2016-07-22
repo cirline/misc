@@ -32,3 +32,11 @@
 *.dSYM/
 
 tags
+
+autom4te.cache
+
+config.*
+.deps
+stamp-h1
+autoscan.log
+configure.scan
