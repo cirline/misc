@@ -41,3 +41,4 @@ stamp-h1
 autoscan.log
 configure.scan
 .dirstamp
+*_demo

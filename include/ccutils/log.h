@@ -35,7 +35,7 @@ enum __e_debug_level {
 #define pr_err(s, ...)		pr_log(ANDROID_LOG_ERROR, pr_fmt(""), s, ##__VA_ARGS__)
 #else
 #define pr_info(s, ...)		pr_log(LOG_LEVEL_INFO, NULL, " i "pr_fmt(s), ##__VA_ARGS__)
-#define pr_warn(s, ...)		pr_log(LOG_LEVEL_WARN, NULL, " i "pr_fmt(s), ##__VA_ARGS__)
+#define pr_warn(s, ...)		pr_log(LOG_LEVEL_WARN, NULL, " w "pr_fmt(s), ##__VA_ARGS__)
 #define pr_err(s, ...)		pr_log(LOG_LEVEL_ERROR, NULL, " e "pr_fmt(s), ##__VA_ARGS__)
 #endif
 

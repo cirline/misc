@@ -75,6 +75,11 @@ struct dir_node * put_dir_node(struct dir_node *node)
 	return p;
 }
 
+/**
+ * dir_scan - scan a dir and execute the fn_do_each_t
+ * @root: the scan root directory
+ * @do_each: execute function
+ */
 int dir_scan(const char * root, fn_do_each_t do_each)
 {
 	struct dirent *dir;
