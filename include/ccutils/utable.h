@@ -15,8 +15,8 @@ struct hash_table_desc {
 
 	void * (*insert)(void *node);
 	void (*remove)(void *p);
-	void (*foreach)(int index, void *p);
-	void (*print)(int index, void *p);
+	int (*foreach)(int index, struct table_node *node);
+	int (*print)(int index, struct table_node *node);
 };
 
 typedef void (*tbl_custom_pr_t)(int index, void *p);
@@ -24,6 +24,7 @@ typedef void (*tbl_custom_pr_t)(int index, void *p);
 extern int hash_table_lookup(struct hash_table_desc *ht, struct table_node *node);
 extern int hash_table_insert(struct hash_table_desc *ht, struct table_node *node);
 extern int hash_table_remove(struct hash_table_desc *ht, struct table_node *node);
+extern void * hash_table_get_nodedata(struct table_node *node);
 extern int hash_table_foreach(struct hash_table_desc *ht);
 extern int hash_table_print(struct hash_table_desc *ht);
 
