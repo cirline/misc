@@ -55,6 +55,9 @@ int main(void)
 		sqlite3_free(errmsg);
 	}
 
+	db_table_check(db, "mytable", NULL, NULL);
+	db_table_check(db, "mytable1", NULL, NULL);
+
 	sqlite3_close(db);
 
 	return rc;

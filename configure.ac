@@ -19,10 +19,6 @@ AM_PROG_AR
 
 LT_INIT
 
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-lutils':
-AC_CHECK_LIB([utils], [main])
-
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h netinet/in.h stdlib.h string.h sys/socket.h unistd.h])
 
