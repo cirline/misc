@@ -8,3 +8,6 @@ check_PROGRAMS += dir_demo
 dir_demo_SOURCES = test_dir.c
 dir_demo_LDADD = -lccutils -ldl -lpthread
 
+check_PROGRAMS += db_demo
+db_demo_SOURCES = test_db.c
+db_demo_LDADD = -lccutils -ldl -lpthread
