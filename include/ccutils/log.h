@@ -34,9 +34,9 @@ enum __e_debug_level {
 #define pr_warn(s, ...)		pr_log(ANDROID_LOG_WARN, pr_fmt(""), s, ##__VA_ARGS__)
 #define pr_err(s, ...)		pr_log(ANDROID_LOG_ERROR, pr_fmt(""), s, ##__VA_ARGS__)
 #else
-#define pr_info(s, ...)		pr_log(LOG_LEVEL_INFO, NULL, " i "pr_fmt(s), ##__VA_ARGS__)
-#define pr_warn(s, ...)		pr_log(LOG_LEVEL_WARN, NULL, " w "pr_fmt(s), ##__VA_ARGS__)
-#define pr_err(s, ...)		pr_log(LOG_LEVEL_ERROR, NULL, " e "pr_fmt(s), ##__VA_ARGS__)
+#define pr_info(s, ...)		pr_log(LOG_LEVEL_INFO, NULL, "<i>"pr_fmt(s), ##__VA_ARGS__)
+#define pr_warn(s, ...)		pr_log(LOG_LEVEL_WARN, NULL, "<w>"pr_fmt(s), ##__VA_ARGS__)
+#define pr_err(s, ...)		pr_log(LOG_LEVEL_ERROR, NULL, "<e>"pr_fmt(s), ##__VA_ARGS__)
 #endif
 
 #define pr_enter()		pr_debug("enter, %s, %d\n", __func__, __LINE__)
