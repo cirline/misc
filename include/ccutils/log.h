@@ -23,7 +23,7 @@ enum __e_debug_level {
 #ifdef ANDROID
 #define pr_debug(s, ...)	pr_log(ANDROID_LOG_INFO, pr_fmt(""), s, ##__VA_ARGS__)
 #else
-#define pr_debug(s, ...)	pr_log(LOG_LEVEL_DEBUG, NULL, " d "pr_fmt(s), ##__VA_ARGS__)
+#define pr_debug(s, ...)	pr_log(LOG_LEVEL_DEBUG, NULL, "<d>"pr_fmt(s), ##__VA_ARGS__)
 #endif
 #else
 #define pr_debug(s, ...)

@@ -1,4 +1,8 @@
+//#define DEBUG
+#define pr_fmt(fmt)	"db: " fmt
+
 #include <stdlib.h>
+#include <string.h>
 
 #include <ccutils/db.h>
 #include <ccutils/log.h>
@@ -43,13 +47,9 @@ inline int db_exec(sqlite3 *hdl, const char *sql, int (*cb)(void*,int,char**,cha
 static int db_get_acell_callback(void *p, int nc, char **cv, char **cn)
 {
 	int i;
+	char **cellval = p;
 
-	pr_here();
-
-	for(i = 0; i < nc; i++) {
-		printf("\t%s - %s,", cn[i], cv[i]);
-	}
-	printf("\n");
+	*cellval = nc > 0 ? strdup(cv[0]) : NULL;
 
 	return 0;
 }
@@ -58,17 +58,19 @@ static char * db_get_acell(sqlite3 *pdb, const char *sql)
 {
 	char *msg;
 	int rc;
+	char *cellval = NULL;
 
 	if(!pdb)
 		return NULL;
 
-	rc = db_exec(pdb, sql, db_get_acell_callback, NULL, &msg);
+	pr_here();
+	rc = db_exec(pdb, sql, db_get_acell_callback, &cellval, &msg);
 	if(rc != SQLITE_OK) {
 		pr_err("exec: %s\n", msg);
 		free(msg);
 	}
 
-	return 0;
+	return cellval;
 }
 
 char * db_get_acell_int(sqlite3 *pdb, const char *tbl, const char *key, int keyval, const char *column)
@@ -76,30 +78,117 @@ char * db_get_acell_int(sqlite3 *pdb, const char *tbl, const char *key, int keyv
 	char *sql;
 	char *result;
 
-	asprintf(sql, "select %s from '%s' where %s = %d;", column, tbl, key, keyval);
+	pr_here();
+	asprintf(&sql, "select %s from '%s' where %s = %d;", column, tbl, key, keyval);
 	result = db_get_acell(pdb, sql);
 	free(sql);
 
 	return result;
 }
 
+/**
+ * db_get_acell_str - get a cell value by record key and column name
+ * @db: an opened database
+ * @tbl: table name
+ * @key: record key column name
+ * @keyval: record key value
+ * @column: cell column name
+ *
+ * the return value is a string by strdup from cell value, invoke free() to release the malloc memory
+ * or NULL if record not found
+ */
 char * db_get_acell_str(sqlite3 *pdb, const char *tbl, const char *key, const char *keyval, const char *column)
 {
 	char *sql;
 	char *result;
 
-	asprintf(sql, "select %s from '%s' where %s = '%s';", column, tbl, key, keyval);
+	asprintf(&sql, "select %s from '%s' where %s = '%s';", column, tbl, key, keyval);
 	result = db_get_acell(pdb, sql);
 	free(sql);
 
 	return result;
 }
 
-int db_table_check(sqlite3 *pdb, const char *tbl, char *cols[], const char *subsql)
+/**
+ * db_column_index - get column index by name
+ * @db: an opened database
+ * @tbl: table name
+ * @column: column name
+ *
+ * the return value is a integer of 1 to Ncolumn-1,
+ * zero is column "id" but never return, and -1 if column not found
+ */
+int db_column_index(sqlite3 *db, const char *tbl, const char *column)
+{
+	char *sql_ct;
+	char *scol;
+	char *anchor;
+	int index;
+
+	if(!db)
+		return -1;
+
+	sql_ct = db_get_acell_str(db, "sqlite_master", "name", tbl, "sql");
+
+	asprintf(&scol, ", %s ", column);
+	anchor = strstr(sql_ct, scol);
+	pr_debug("anchor %s,,,, %p, %p\n", anchor, sql_ct, anchor);
+	if(!anchor) {
+		index = -1;
+	} else {
+		char *temp = sql_ct;
+		for(index = 1; temp != anchor; temp++) {
+			if(*temp == ',')
+				index++;
+		}
+	}
+
+	free(scol);
+	free(sql_ct);
+
+	return index;
+}
+
+int db_column_check(sqlite3 *db, const char *tbl, const char *column)
+{
+	int idx;
+	
+	idx = db_column_index(db, tbl, column);
+
+	pr_info("idx = %d\n", idx);
+
+	return 0;
+}
+
+int db_table_check(sqlite3 *db, const char *tbl, char *cols[], const char *subsql)
 {
 	char *sql;
+	char *result;
+	char *msg;
+	int rc;
 
-	db_get_acell_str(pdb, "sqlite_master", "name", tbl, "*");
+	result = db_get_acell_str(db, "sqlite_master", "name", tbl, "*");
+	if(result) {
+		pr_info("%s found\n", tbl);
+		free(result);
+	} else {
+		pr_warn("%s not found\n", tbl);
+		asprintf(&sql, "create table '%s' (id integer primary key autoincrement %s);", tbl, subsql ? subsql : "");
+		pr_info("sql: %s\n", sql);
+		rc = db_exec(db, sql, NULL, NULL, &msg);
+		if(rc != SQLITE_OK) {
+			pr_err("create table: %s\n", msg);
+			return -1;
+		}
+	}
+
+	if(cols) {
+		int i;
+
+		for(i = 0; cols[i]; i++) {
+			db_column_check(db, tbl, cols[i]);
+		}
+	}
 
 	return 0;
 }
