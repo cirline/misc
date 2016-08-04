@@ -149,18 +149,47 @@ int db_column_index(sqlite3 *db, const char *tbl, const char *column)
 	return index;
 }
 
-int db_column_check(sqlite3 *db, const char *tbl, const char *column)
+/**
+ * db_column_check - check table columns and creat it
+ * @db: an opened database
+ * @tbl: table name
+ * @column: column group
+ *
+ * the return value is a integer greater than zero if column exist or create successfully,
+ * or less then zero if column not exist or create failure.
+ */
+int db_column_check(sqlite3 *db, const char *tbl, const char *column[])
 {
 	int idx;
 	
-	idx = db_column_index(db, tbl, column);
+	idx = db_column_index(db, tbl, column[0]);
 
-	pr_info("idx = %d\n", idx);
+	if(idx < 0) {
+		int rc;
+		char *errmsg;
+		char *sql;
 
-	return 0;
+		asprintf(&sql, "alter table '%s' add column %s %s;", tbl, column[0], column[1]);
+		rc = db_exec(db, sql, NULL, NULL, &errmsg);
+		if(rc != SQLITE_OK) {
+			pr_err("alter %s,%s: %s\n", tbl, column[0], errmsg);
+			free(errmsg);
+			rc = -1;
+		} else
+			rc = 1;
+	}
+
+	return idx;
 }
 
-int db_table_check(sqlite3 *db, const char *tbl, char *cols[], const char *subsql)
+/**
+ * db_table_check - check table and creat it
+ * @db: an opened db
+ * @tbl: table name
+ * @cols: column group
+ * @subsql: use subsql to create unique or no null column
+ */
+int db_table_check(sqlite3 *db, const char *tbl, char *cols[][2], const char *subsql)
 {
 	char *sql;
 	char *result;
@@ -185,7 +214,7 @@ int db_table_check(sqlite3 *db, const char *tbl, char *cols[], const char *subsq
 	if(cols) {
 		int i;
 
-		for(i = 0; cols[i]; i++) {
+		for(i = 0; cols[i][0]; i++) {
 			db_column_check(db, tbl, cols[i]);
 		}
 	}

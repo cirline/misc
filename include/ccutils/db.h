@@ -19,6 +19,6 @@ extern inline int db_exec(sqlite3 *hdl, const char *sql, int (*cb)(void*,int,cha
 
 extern char * db_get_acell_int(sqlite3 *pdb, const char *tbl, const char *key, int keyval, const char *column);
 extern char * db_get_acell_str(sqlite3 *pdb, const char *tbl, const char *key, const char *keyval, const char *column);
-extern int db_table_check(sqlite3 *pdb, const char *tbl, char *cols[], const char *subsql);
+extern int db_table_check(sqlite3 *db, const char *tbl, char *cols[][2], const char *subsql);
 
 #endif

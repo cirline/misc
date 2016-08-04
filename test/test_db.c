@@ -28,10 +28,13 @@ int main(void)
 	int rc;
 	char * errmsg = NULL;
 
-	pr_here();
+	char *columns[][2] = {
+		{"cola", "varchar(32)" },
+		{"name", "integer" },
+		{}
+	};
 
-
-	rc = db_open("test.db.local", &db);
+	rc = db_open("test.local.db", &db);
 	if(rc != SQLITE_OK) {
 		pr_err("open %s\n", sqlite3_errmsg(db));
 		return rc;
@@ -55,7 +58,7 @@ int main(void)
 		sqlite3_free(errmsg);
 	}
 
-	db_table_check(db, "mytable", NULL, NULL);
+	db_table_check(db, "mytable", columns, NULL);
 	db_table_check(db, "mytable1", NULL, NULL);
 
 	sqlite3_close(db);
