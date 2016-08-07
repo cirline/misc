@@ -14,8 +14,8 @@ struct celltype {
 	} data;
 };
 
-extern inline int db_open(const char *filename, sqlite3 **ppdb);
-extern inline int db_exec(sqlite3 *hdl, const char *sql, int (*cb)(void*,int,char**,char**), void *arg, char **errmsg);
+extern int db_open(const char *filename, sqlite3 **ppdb);
+extern int db_exec(sqlite3 *hdl, const char *sql, int (*cb)(void*,int,char**,char**), void *arg, char **errmsg);
 
 extern char * db_get_acell_int(sqlite3 *pdb, const char *tbl, const char *key, int keyval, const char *column);
 extern char * db_get_acell_str(sqlite3 *pdb, const char *tbl, const char *key, const char *keyval, const char *column);

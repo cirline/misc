@@ -33,6 +33,8 @@
 
 tags
 
+*.local.db
+
 # automake
 *_demo
 *_out

@@ -1,6 +1,9 @@
 //#define DEBUG
+
+#define _GNU_SOURCE
 #define pr_fmt(fmt)	"db: " fmt
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -19,7 +22,7 @@
  * otherwise an [error code] is returned,
  * use sqlite3_errmsg(ppdb) obtain an error description
  */
-inline int db_open(const char *filename, sqlite3 **ppdb)
+int db_open(const char *filename, sqlite3 **ppdb)
 {
 	return sqlite3_open(filename, ppdb);
 }
@@ -39,7 +42,7 @@ inline int db_open(const char *filename, sqlite3 **ppdb)
  * also write an error message into errmsg
  * if callback returns non-zero, db_exec will break and return SQLITE_ABORT
  */
-inline int db_exec(sqlite3 *hdl, const char *sql, int (*cb)(void*,int,char**,char**), void *arg, char **errmsg)
+int db_exec(sqlite3 *hdl, const char *sql, int (*cb)(void*,int,char**,char**), void *arg, char **errmsg)
 {
 	return sqlite3_exec(hdl, sql, cb, arg, errmsg);
 }
